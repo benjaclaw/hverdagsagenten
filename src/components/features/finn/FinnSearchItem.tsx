@@ -1,5 +1,5 @@
 import { View, Text, Alert } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Card } from "../../ui/Card";
 import { Button } from "../../ui/Button";
 import {
@@ -10,10 +10,9 @@ import type { FinnSearch } from "../../../types";
 
 interface FinnSearchItemProps {
   search: FinnSearch;
-  onPress?: () => void;
 }
 
-export function FinnSearchItem({ search, onPress }: FinnSearchItemProps) {
+export function FinnSearchItem({ search }: FinnSearchItemProps) {
   const deleteMutation = useDeleteFinnSearch();
   const toggleMutation = useToggleFinnSearch();
 
@@ -32,8 +31,15 @@ export function FinnSearchItem({ search, onPress }: FinnSearchItemProps) {
     toggleMutation.mutate({ id: search.id, isActive: !search.is_active });
   };
 
+  const handlePress = () => {
+    router.push({
+      pathname: "/finn-results/[id]",
+      params: { id: search.id, name: search.name },
+    });
+  };
+
   return (
-    <Card onPress={onPress} className="mb-3">
+    <Card onPress={handlePress} className="mb-3">
       <View className="flex-row items-center justify-between">
         <View className="flex-1 mr-3">
           <Text className="text-base font-semibold text-gray-900 dark:text-white">

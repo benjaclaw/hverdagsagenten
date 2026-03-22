@@ -1,4 +1,5 @@
 import { View, Text, Alert } from "react-native";
+import { router } from "expo-router";
 import { Card } from "../../ui/Card";
 import { Button } from "../../ui/Button";
 import { useDeletePriceWatch } from "../../../hooks/usePriceWatches";
@@ -10,6 +11,13 @@ interface PriceWatchItemProps {
 
 export function PriceWatchItem({ watch }: PriceWatchItemProps) {
   const deleteMutation = useDeletePriceWatch();
+
+  const handlePress = () => {
+    router.push({
+      pathname: "/price-alerts/[id]",
+      params: { id: watch.id, name: watch.search_term },
+    });
+  };
 
   const handleDelete = () => {
     Alert.alert(
@@ -27,7 +35,7 @@ export function PriceWatchItem({ watch }: PriceWatchItemProps) {
   };
 
   return (
-    <Card className="mb-3">
+    <Card onPress={handlePress} className="mb-3">
       <View className="flex-row items-center justify-between">
         <View className="flex-1 mr-3">
           <Text className="text-base font-semibold text-gray-900 dark:text-white">

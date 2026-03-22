@@ -6,7 +6,6 @@ import {
   FlatList,
   Pressable,
   Alert,
-  SectionList,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import {
