@@ -3,7 +3,7 @@ import Constants from "expo-constants";
 
 let notificationsConfigured = false;
 
-async function configureNotifications() {
+async function configureNotifications(): Promise<void> {
   if (notificationsConfigured) return;
   try {
     const Notifications = await import("expo-notifications");
@@ -18,7 +18,7 @@ async function configureNotifications() {
     });
     notificationsConfigured = true;
   } catch {
-    console.warn("expo-notifications not available");
+    // expo-notifications not available in this environment
   }
 }
 
@@ -30,7 +30,8 @@ export async function registerForPushNotifications(): Promise<string | null> {
     await configureNotifications();
     const Notifications = await import("expo-notifications");
 
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
     if (existingStatus !== "granted") {
@@ -50,10 +51,10 @@ export async function registerForPushNotifications(): Promise<string | null> {
     }
 
     const projectId = Constants.expoConfig?.extra?.eas?.projectId;
-    const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+    const token = (await Notifications.getExpoPushTokenAsync({ projectId }))
+      .data;
     return token;
-  } catch (error) {
-    console.warn("Push registration failed:", error);
+  } catch {
     return null;
   }
 }
@@ -61,13 +62,15 @@ export async function registerForPushNotifications(): Promise<string | null> {
 export async function savePushToken(token: string): Promise<void> {
   try {
     const { supabase } = await import("../lib/supabase");
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     await supabase
       .from("push_tokens")
       .upsert({ user_id: user.id, token }, { onConflict: "user_id,token" });
-  } catch (error) {
-    console.warn("Save push token failed:", error);
+  } catch {
+    // Silently fail — token will be retried on next app open
   }
 }

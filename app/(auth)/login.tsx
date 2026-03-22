@@ -93,7 +93,7 @@ export default function LoginScreen() {
           ) : null}
         </View>
 
-        <View className="mb-6">
+        <View className="mb-2">
           <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
             Passord
           </Text>
@@ -111,6 +111,16 @@ export default function LoginScreen() {
               {fieldErrors.password}
             </Text>
           ) : null}
+        </View>
+
+        <View className="mb-6 items-end">
+          <Link href="/(auth)/forgot-password" asChild>
+            <Pressable>
+              <Text className="text-sm font-medium text-primary">
+                Glemt passord?
+              </Text>
+            </Pressable>
+          </Link>
         </View>
 
         <Pressable
