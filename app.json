@@ -34,7 +34,14 @@
     },
     "owner": "benjaclaw",
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#2563EB"
+        }
+      ]
     ]
   }
 }
