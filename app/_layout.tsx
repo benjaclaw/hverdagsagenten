@@ -1,4 +1,6 @@
+import "../global.css";
 import { useEffect } from "react";
+import { useColorScheme } from "react-native";
 import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { supabase } from "../src/lib/supabase";
@@ -8,6 +10,7 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const setSession = useAuthStore((s) => s.setSession);
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
@@ -21,7 +24,14 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: colorScheme === "dark" ? "#0F172A" : "#F8FAFC",
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }
