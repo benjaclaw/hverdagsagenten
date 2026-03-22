@@ -1,5 +1,6 @@
 import { useColorScheme } from "react-native";
 import { Tabs } from "expo-router";
+import { Feather } from "@expo/vector-icons";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -21,10 +22,42 @@ export default function TabLayout() {
         tabBarInactiveTintColor: isDark ? "#94A3B8" : "#64748B",
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Dashboard" }} />
-      <Tabs.Screen name="finn" options={{ title: "Finn" }} />
-      <Tabs.Screen name="prices" options={{ title: "Priser" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profil" }} />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Dashboard",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="finn"
+        options={{
+          title: "Finn",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="search" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="prices"
+        options={{
+          title: "Priser",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="shopping-cart" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profil",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="user" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

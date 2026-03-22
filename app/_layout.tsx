@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { supabase } from "../src/lib/supabase";
 import { useAuthStore } from "../src/stores/authStore";
 
@@ -23,15 +24,17 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: {
-            backgroundColor: colorScheme === "dark" ? "#0F172A" : "#F8FAFC",
-          },
-        }}
-      />
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: {
+              backgroundColor: colorScheme === "dark" ? "#0F172A" : "#F8FAFC",
+            },
+          }}
+        />
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }
