@@ -1,37 +1,52 @@
-import { View, Text, FlatList, Pressable } from "react-native";
+import { View, Text, FlatList, Pressable, Image } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
 import { usePriceAlerts } from "../../src/hooks/usePriceWatches";
 import { EmptyState, LoadingSpinner } from "../../src/components/ui";
 import { Card } from "../../src/components/ui/Card";
 import { Feather } from "@expo/vector-icons";
-import { useColorScheme } from "react-native";
+import { useResolvedTheme } from "../../src/stores/themeStore";
 import type { PriceAlert } from "../../src/types";
 
 function PriceAlertItem({ alert }: { alert: PriceAlert }) {
   return (
     <Card className="mb-3">
-      <Text className="text-base font-semibold text-gray-900 dark:text-white">
-        {alert.product_name}
-      </Text>
-      {alert.store ? (
-        <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          {alert.store}
-        </Text>
-      ) : null}
-      <Text className="text-lg font-bold text-primary mt-1">
-        {alert.price.toFixed(2)} kr
-      </Text>
-      <Text className="text-xs text-gray-400 mt-1">
-        {new Date(alert.created_at).toLocaleDateString("nb-NO")}
-      </Text>
+      <View className="flex-row">
+        {alert.image_url ? (
+          <Image
+            source={{ uri: alert.image_url }}
+            className="h-16 w-16 rounded-lg mr-3"
+            resizeMode="cover"
+          />
+        ) : (
+          <View className="h-16 w-16 rounded-lg bg-gray-100 dark:bg-gray-700 items-center justify-center mr-3">
+            <Feather name="package" size={24} color="#9CA3AF" />
+          </View>
+        )}
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900 dark:text-white">
+            {alert.product_name}
+          </Text>
+          {alert.store ? (
+            <Text className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              {alert.store}
+            </Text>
+          ) : null}
+          <Text className="text-lg font-bold text-primary mt-0.5">
+            {alert.price.toFixed(2)} kr
+          </Text>
+          <Text className="text-xs text-gray-400 mt-0.5">
+            {new Date(alert.created_at).toLocaleDateString("nb-NO")}
+          </Text>
+        </View>
+      </View>
     </Card>
   );
 }
 
 export default function PriceAlertsScreen() {
   const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const theme = useResolvedTheme();
+  const isDark = theme === "dark";
 
   const {
     data: alerts,
