@@ -69,7 +69,7 @@ export async function createPriceWatch(
 
   const { data, error } = await supabase
     .from("price_watches")
-    .insert({ ...input, user_id: user.id })
+    .insert({ ...input, user_id: user.id, is_active: true })
     .select()
     .single();
 

@@ -33,7 +33,7 @@ export async function createFinnSearch(
 
   const { data, error } = await supabase
     .from("finn_searches")
-    .insert({ ...input, user_id: user.id })
+    .insert({ ...input, user_id: user.id, is_active: true })
     .select()
     .single();
 
