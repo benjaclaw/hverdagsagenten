@@ -10,7 +10,8 @@ import type { PriceWatch } from "../types";
 
 const PRICE_WATCHES_KEY = ["price-watches"] as const;
 const priceAlertsKey = (watchId: string) => ["price-alerts", watchId] as const;
-const kassalSearchKey = (query: string) => ["kassal-search", query] as const;
+const kassalSearchKey = (query: string, region: string) =>
+  ["kassal-search", query, region] as const;
 
 export function usePriceWatches() {
   return useQuery({
@@ -27,10 +28,10 @@ export function usePriceAlerts(watchId: string) {
   });
 }
 
-export function useKassalSearch(query: string) {
+export function useKassalSearch(query: string, region?: string) {
   return useQuery({
-    queryKey: kassalSearchKey(query),
-    queryFn: () => searchKassalProducts(query),
+    queryKey: kassalSearchKey(query, region ?? ""),
+    queryFn: () => searchKassalProducts(query, region),
     enabled: query.length >= 2,
   });
 }

@@ -6,6 +6,7 @@ import {
   FlatList,
   Pressable,
   Alert,
+  ScrollView,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import {
@@ -17,14 +18,27 @@ import { KassalSearchResult } from "../../src/components/features/prices/KassalS
 import { PriceWatchItem } from "../../src/components/features/prices/PriceWatchItem";
 import { EmptyState, LoadingSpinner } from "../../src/components/ui";
 
+const REGIONS = [
+  { value: "", label: "Alle" },
+  { value: "Oslo", label: "Oslo" },
+  { value: "Bergen", label: "Bergen" },
+  { value: "Trondheim", label: "Trondheim" },
+  { value: "Stavanger", label: "Stavanger" },
+  { value: "Tromsø", label: "Tromsø" },
+  { value: "Kristiansand", label: "Kristiansand" },
+  { value: "Drammen", label: "Drammen" },
+  { value: "Fredrikstad", label: "Fredrikstad" },
+] as const;
+
 export default function PricesScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [region, setRegion] = useState("");
   const [debounceTimer, setDebounceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: watches, isLoading: watchesLoading, refetch } = usePriceWatches();
   const { data: searchResults, isLoading: searchLoading } =
-    useKassalSearch(debouncedQuery);
+    useKassalSearch(debouncedQuery, region);
   const createMutation = useCreatePriceWatch();
 
   const handleSearchChange = useCallback(
@@ -55,8 +69,39 @@ export default function PricesScreen() {
 
   return (
     <View className="flex-1 bg-bg-light dark:bg-bg-dark">
-      {/* Search bar */}
+      {/* Region selector */}
       <View className="px-4 pt-4">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8 }}
+        >
+          {REGIONS.map((r) => (
+            <Pressable
+              key={r.value}
+              onPress={() => setRegion(r.value)}
+              className={`rounded-full px-4 py-2 ${
+                region === r.value
+                  ? "bg-primary"
+                  : "bg-gray-100 dark:bg-gray-700"
+              }`}
+            >
+              <Text
+                className={`text-sm font-medium ${
+                  region === r.value
+                    ? "text-white"
+                    : "text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                {r.label}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Search bar */}
+      <View className="px-4 pt-3">
         <View className="flex-row items-center rounded-lg border border-gray-300 bg-white px-3 dark:border-gray-600 dark:bg-gray-800">
           <Feather name="search" size={18} color="#9CA3AF" />
           <TextInput

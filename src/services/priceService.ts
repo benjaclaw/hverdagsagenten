@@ -26,12 +26,21 @@ interface KassalSearchResponse {
 }
 
 export async function searchKassalProducts(
-  query: string
+  query: string,
+  region?: string
 ): Promise<KassalProduct[]> {
   const apiKey = process.env.EXPO_PUBLIC_KASSALAPP_API_KEY ?? "";
 
+  const params = new URLSearchParams({
+    search: query,
+    size: "10",
+  });
+  if (region) {
+    params.set("store", region);
+  }
+
   const response = await fetch(
-    `${KASSAL_API_BASE}/products?search=${encodeURIComponent(query)}&size=10`,
+    `${KASSAL_API_BASE}/products?${params.toString()}`,
     {
       headers: {
         Authorization: `Bearer ${apiKey}`,
