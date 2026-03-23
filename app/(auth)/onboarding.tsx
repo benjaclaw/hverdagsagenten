@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { View, Text, Pressable, useWindowDimensions } from "react-native";
+import { useState, useRef, useCallback } from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  useWindowDimensions,
+  ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from "react-native";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import * as SecureStore from "expo-secure-store";
@@ -65,11 +73,14 @@ export async function hasCompletedOnboarding(): Promise<boolean> {
 export default function OnboardingScreen() {
   const [currentPage, setCurrentPage] = useState(0);
   const { width } = useWindowDimensions();
+  const scrollRef = useRef<ScrollView>(null);
   const page = pages[currentPage];
 
   const handleNext = async () => {
     if (currentPage < pages.length - 1) {
-      setCurrentPage(currentPage + 1);
+      const next = currentPage + 1;
+      setCurrentPage(next);
+      scrollRef.current?.scrollTo({ x: next * width, animated: true });
     } else {
       await markOnboardingDone();
       router.replace("/(auth)/login");
@@ -80,6 +91,17 @@ export default function OnboardingScreen() {
     await markOnboardingDone();
     router.replace("/(auth)/login");
   };
+
+  const onScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetX = e.nativeEvent.contentOffset.x;
+      const pageIndex = Math.round(offsetX / width);
+      if (pageIndex >= 0 && pageIndex < pages.length) {
+        setCurrentPage(pageIndex);
+      }
+    },
+    [width],
+  );
 
   if (!page) return null;
 
@@ -94,21 +116,37 @@ export default function OnboardingScreen() {
         </Pressable>
       </View>
 
-      {/* Content */}
-      <View className="flex-1 items-center justify-center px-8">
-        <View
-          className="h-24 w-24 rounded-full items-center justify-center mb-8"
-          style={{ backgroundColor: `${page.color}20` }}
-        >
-          <Feather name={page.icon} size={48} color={page.color} />
-        </View>
-        <Text className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-4">
-          {page.title}
-        </Text>
-        <Text className="text-base text-gray-500 dark:text-gray-400 text-center leading-6">
-          {page.description}
-        </Text>
-      </View>
+      {/* Swipeable content */}
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={onScroll}
+        scrollEventThrottle={16}
+        className="flex-1"
+      >
+        {pages.map((p, index) => (
+          <View
+            key={index}
+            style={{ width }}
+            className="flex-1 items-center justify-center px-8"
+          >
+            <View
+              className="h-24 w-24 rounded-full items-center justify-center mb-8"
+              style={{ backgroundColor: `${p.color}20` }}
+            >
+              <Feather name={p.icon} size={48} color={p.color} />
+            </View>
+            <Text className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-4">
+              {p.title}
+            </Text>
+            <Text className="text-base text-gray-500 dark:text-gray-400 text-center leading-6">
+              {p.description}
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
 
       {/* Bottom controls */}
       <View className="px-6 pb-12">
