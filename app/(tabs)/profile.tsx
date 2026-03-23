@@ -1,10 +1,22 @@
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, Pressable } from "react-native";
 import { useAuthStore } from "../../src/stores/authStore";
+import { useThemeStore } from "../../src/stores/themeStore";
 import { Button } from "../../src/components/ui";
+import { Feather } from "@expo/vector-icons";
+
+type ThemeMode = "light" | "dark" | "system";
+
+const themeOptions: { value: ThemeMode; label: string; icon: keyof typeof Feather.glyphMap }[] = [
+  { value: "light", label: "Lys", icon: "sun" },
+  { value: "dark", label: "Mørk", icon: "moon" },
+  { value: "system", label: "System", icon: "smartphone" },
+];
 
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
   const signOut = useAuthStore((s) => s.signOut);
+  const mode = useThemeStore((s) => s.mode);
+  const setMode = useThemeStore((s) => s.setMode);
 
   const handleSignOut = () => {
     Alert.alert("Logg ut", "Er du sikker på at du vil logge ut?", [
@@ -34,6 +46,41 @@ export default function ProfileScreen() {
             ? new Date(user.created_at).toLocaleDateString("nb-NO")
             : "ukjent"}
         </Text>
+      </View>
+
+      {/* Theme selector */}
+      <View className="mb-6">
+        <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+          Utseende
+        </Text>
+        <View className="flex-row gap-3">
+          {themeOptions.map((option) => (
+            <Pressable
+              key={option.value}
+              onPress={() => setMode(option.value)}
+              className={`flex-1 items-center rounded-xl border p-3 ${
+                mode === option.value
+                  ? "border-primary bg-blue-50 dark:bg-blue-900/20"
+                  : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+              }`}
+            >
+              <Feather
+                name={option.icon}
+                size={20}
+                color={mode === option.value ? "#2563EB" : "#9CA3AF"}
+              />
+              <Text
+                className={`mt-1 text-xs font-medium ${
+                  mode === option.value
+                    ? "text-primary"
+                    : "text-gray-500 dark:text-gray-400"
+                }`}
+              >
+                {option.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       <View className="mt-auto pb-8">

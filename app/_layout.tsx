@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAuthStore } from "../src/stores/authStore";
 import { hasCompletedOnboarding } from "./(auth)/onboarding";
+import { useThemeStore } from "../src/stores/themeStore";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,6 +55,11 @@ function AuthGuard() {
 
 export default function RootLayout() {
   const setSession = useAuthStore((s) => s.setSession);
+  const loadTheme = useThemeStore((s) => s.loadTheme);
+
+  useEffect(() => {
+    loadTheme();
+  }, []);
 
   useEffect(() => {
     let mounted = true;

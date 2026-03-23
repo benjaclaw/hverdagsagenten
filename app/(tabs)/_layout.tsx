@@ -1,10 +1,10 @@
-import { useColorScheme } from "react-native";
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import { useResolvedTheme } from "../../src/stores/themeStore";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const theme = useResolvedTheme();
+  const isDark = theme === "dark";
 
   return (
     <Tabs
@@ -34,7 +34,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="finn"
         options={{
-          title: "Finn",
+          title: "Finn.no",
           tabBarIcon: ({ color, size }) => (
             <Feather name="search" size={size} color={color} />
           ),
@@ -43,7 +43,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="prices"
         options={{
-          title: "Priser",
+          title: "Matvarer",
           tabBarIcon: ({ color, size }) => (
             <Feather name="shopping-cart" size={size} color={color} />
           ),
