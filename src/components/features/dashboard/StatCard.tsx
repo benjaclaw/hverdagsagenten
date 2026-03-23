@@ -18,7 +18,7 @@ export function StatCard({
   color = "#2563EB",
 }: StatCardProps) {
   return (
-    <Card className="flex-1 mr-3 last:mr-0">
+    <Card className="flex-1">
       <View className="flex-row items-center mb-2">
         <View
           className="h-8 w-8 rounded-full items-center justify-center mr-2"
