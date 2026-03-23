@@ -1,5 +1,8 @@
 -- Hverdagsagenten: Initial database schema
 -- Run this in your Supabase SQL editor
+--
+-- IMPORTANT: If you get "column finn_results.created_at does not exist",
+-- re-run this migration. All tables require created_at columns.
 
 -- Enable RLS
 alter default privileges in schema public grant all on tables to postgres, anon, authenticated, service_role;
