@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { View, Alert } from "react-native";
-import { Button, Input } from "../../ui";
+import { View, Alert, Text, Pressable, TextInput } from "react-native";
+import { Button } from "../../ui";
 import { useCreateFinnSearch } from "../../../hooks/useFinnSearches";
-import { finnSearchSchema } from "../../../lib/finnValidation";
+import {
+  finnSearchSchema,
+  FINN_CATEGORIES,
+  buildFinnUrl,
+  type FinnCategory,
+} from "../../../lib/finnValidation";
 
 interface CreateFinnSearchFormProps {
   onSuccess?: () => void;
@@ -10,17 +15,27 @@ interface CreateFinnSearchFormProps {
 
 export function CreateFinnSearchForm({ onSuccess }: CreateFinnSearchFormProps) {
   const [name, setName] = useState("");
-  const [url, setUrl] = useState("");
+  const [category, setCategory] = useState<FinnCategory>("torget");
+  const [query, setQuery] = useState("");
+  const [priceFrom, setPriceFrom] = useState("");
+  const [priceTo, setPriceTo] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const mutation = useCreateFinnSearch();
 
   const handleSubmit = () => {
     setFieldErrors({});
 
-    const result = finnSearchSchema.safeParse({ name, url });
-    if (!result.success) {
+    const parsed = finnSearchSchema.safeParse({
+      name,
+      category,
+      query,
+      priceFrom: priceFrom ? Number(priceFrom) : null,
+      priceTo: priceTo ? Number(priceTo) : null,
+    });
+
+    if (!parsed.success) {
       const errors: Record<string, string> = {};
-      result.error.issues.forEach((issue) => {
+      parsed.error.issues.forEach((issue) => {
         const key = issue.path[0]?.toString() ?? "general";
         errors[key] = issue.message;
       });
@@ -28,12 +43,22 @@ export function CreateFinnSearchForm({ onSuccess }: CreateFinnSearchFormProps) {
       return;
     }
 
+    const url = buildFinnUrl({
+      category,
+      query: query.trim(),
+      priceFrom: priceFrom ? Number(priceFrom) : null,
+      priceTo: priceTo ? Number(priceTo) : null,
+    });
+
     mutation.mutate(
-      { name: name.trim(), url: url.trim() },
+      { name: name.trim(), url },
       {
         onSuccess: () => {
           setName("");
-          setUrl("");
+          setQuery("");
+          setPriceFrom("");
+          setPriceTo("");
+          setCategory("torget");
           onSuccess?.();
         },
         onError: (error) => {
@@ -45,22 +70,108 @@ export function CreateFinnSearchForm({ onSuccess }: CreateFinnSearchFormProps) {
 
   return (
     <View className="p-4">
-      <Input
-        label="Navn på søk"
-        placeholder="F.eks. Sofa under 5000kr"
-        value={name}
-        onChangeText={setName}
-        error={fieldErrors.name}
-      />
-      <Input
-        label="Finn.no URL"
-        placeholder="https://www.finn.no/bap/forsale/search.html?..."
-        value={url}
-        onChangeText={setUrl}
-        autoCapitalize="none"
-        keyboardType="url"
-        error={fieldErrors.url}
-      />
+      {/* Navn */}
+      <View className="mb-3">
+        <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Navn på søk
+        </Text>
+        <TextInput
+          className="rounded-lg border border-gray-300 bg-white px-3 py-3 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          placeholder="F.eks. Sofa under 5000kr"
+          placeholderTextColor="#9CA3AF"
+          value={name}
+          onChangeText={setName}
+        />
+        {fieldErrors.name ? (
+          <Text className="mt-1 text-xs text-red-500">{fieldErrors.name}</Text>
+        ) : null}
+      </View>
+
+      {/* Kategori */}
+      <View className="mb-3">
+        <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Kategori
+        </Text>
+        <View className="flex-row flex-wrap gap-2">
+          {FINN_CATEGORIES.map((cat) => (
+            <Pressable
+              key={cat.value}
+              onPress={() => setCategory(cat.value)}
+              className={`rounded-full px-4 py-2 ${
+                category === cat.value
+                  ? "bg-primary"
+                  : "bg-gray-100 dark:bg-gray-700"
+              }`}
+            >
+              <Text
+                className={`text-sm font-medium ${
+                  category === cat.value
+                    ? "text-white"
+                    : "text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                {cat.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        {fieldErrors.category ? (
+          <Text className="mt-1 text-xs text-red-500">
+            {fieldErrors.category}
+          </Text>
+        ) : null}
+      </View>
+
+      {/* Søkeord */}
+      <View className="mb-3">
+        <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Søkeord
+        </Text>
+        <TextInput
+          className="rounded-lg border border-gray-300 bg-white px-3 py-3 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          placeholder="F.eks. sofa, sykkel, iPhone..."
+          placeholderTextColor="#9CA3AF"
+          value={query}
+          onChangeText={setQuery}
+          autoCapitalize="none"
+        />
+        {fieldErrors.query ? (
+          <Text className="mt-1 text-xs text-red-500">
+            {fieldErrors.query}
+          </Text>
+        ) : null}
+      </View>
+
+      {/* Prisområde */}
+      <View className="mb-4 flex-row gap-3">
+        <View className="flex-1">
+          <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+            Min. pris
+          </Text>
+          <TextInput
+            className="rounded-lg border border-gray-300 bg-white px-3 py-3 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            placeholder="Valgfritt"
+            placeholderTextColor="#9CA3AF"
+            value={priceFrom}
+            onChangeText={setPriceFrom}
+            keyboardType="numeric"
+          />
+        </View>
+        <View className="flex-1">
+          <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+            Maks pris
+          </Text>
+          <TextInput
+            className="rounded-lg border border-gray-300 bg-white px-3 py-3 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            placeholder="Valgfritt"
+            placeholderTextColor="#9CA3AF"
+            value={priceTo}
+            onChangeText={setPriceTo}
+            keyboardType="numeric"
+          />
+        </View>
+      </View>
+
       <Button
         title="Opprett søk"
         onPress={handleSubmit}
